@@ -1,35 +1,44 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { ExchangeCard } from "./ExchangeCard";
+import { server } from "../../main";
+import Loader from "../Loader/Loader";
 
-const url = `https://api.coingecko.com/api/v3/exchanges`;
 const Exchanges = () => {
-  const [image, setImage] = useState("");
-  const [name, setName] = useState("");
-  const [country, setCountry] = useState("");
+  const [data, setData] = useState([]);
+  const [isloader, setLoader] = useState(true);
+  const [error, setError] = useState(false);
 
   const fetchExchange = async () => {
     try {
-      let data = await axios.get(url);
-      console.log("Exchange Data :- " + JSON.stringify(data));
+      const { data } = await axios.get(`${server}exchanges`);
+      setData(data);
+      setLoader(false);
     } catch (e) {
-      console.log("Something went wrong");
+      setLoader(false);
+      setError(true);
     }
   };
 
   useEffect(() => {
     fetchExchange();
   }, []);
-  return (
-    <div className="w-full h-full  flex items-center justify-center bg-slate-200">
-      <div className="bg-slate-600 shadow-slate-950 shadow-2xl  py-8 px-8 rounded-xl w-[50%]">
-        Exchanges
 
-        <p>
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptate
-          alias nobis rerum asperiores mollitia iste obcaecati unde aspernatur
-          consectetur. Aliquid facilis quis tenetur. Architecto quia in
-          provident, exercitationem ad quod.
-        </p>
+  if (error)
+    return (
+      <div className="text-center text-[48%] h-[80%] text-red-800 flex items-center justify-center">
+        <h3 className="font-semibold text-[48px]">Something Went Wrong</h3>
+      </div>
+    );
+
+  return isloader ? (
+    <Loader />
+  ) : (
+    <div className="w-full   items-center justify-center bg-slate-200">
+      <div className="lg:px-28   lg:grid  lg:grid-cols-5 gap-4 md:flex md:flex-col md:rounded-lg md:px-12">
+        {data.map((element) => {
+          return <ExchangeCard key={element.id} data={element} />;
+        })}
       </div>
     </div>
   );
